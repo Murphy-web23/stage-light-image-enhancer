@@ -8,7 +8,7 @@ from src.utils import pil_to_png_bytes
 
 
 st.set_page_config(
-    page_title="Stage Light Image Enhancer",
+    page_title="演唱會影像修復工具",
     page_icon="🎤",
     layout="wide",
 )
@@ -105,7 +105,7 @@ def show_current_parameters(
 def main() -> None:
     initialize_settings()
 
-    st.title("Stage Light Image Enhancer")
+    st.title("演唱會影像修復工具")
     st.caption("舞台燈 / 演唱會照片修復工具")
 
     with st.sidebar:

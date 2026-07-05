@@ -98,10 +98,10 @@ streamlit run app.py
 
 這個專案是 Streamlit + OpenCV 應用，不能像純 HTML 一樣直接雙擊檔案開啟。它需要一個 Python 服務在背後執行影像處理。
 
-如果要讓一般使用者不用建立虛擬環境，建議部署到 Streamlit Community Cloud。部署完成後，使用者只需要打開一個網址就能使用，例如：
+如果要讓一般使用者不用建立虛擬環境，建議部署到 Streamlit Community Cloud。部署完成後，使用者只需要打開 Streamlit Cloud 產生的實際網址就能使用。
 
 ```text
-https://your-app-name.streamlit.app
+https://stage-light-image-enhancer-9nnjftf4rudasqxdmc8sbq.streamlit.app/
 ```
 
 部署步驟：
