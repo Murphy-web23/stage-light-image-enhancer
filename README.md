@@ -93,6 +93,42 @@ streamlit run app.py
 
 開啟 Streamlit 頁面後，上傳一張 JPG 或 PNG 圖片，調整側邊欄參數，即可查看修復前後比較並下載結果。
 
+
+## 線上使用與部署
+
+這個專案是 Streamlit + OpenCV 應用，不能像純 HTML 一樣直接雙擊檔案開啟。它需要一個 Python 服務在背後執行影像處理。
+
+如果要讓一般使用者不用建立虛擬環境，建議部署到 Streamlit Community Cloud。部署完成後，使用者只需要打開一個網址就能使用，例如：
+
+```text
+https://your-app-name.streamlit.app
+```
+
+部署步驟：
+
+1. 將專案推到 GitHub
+2. 前往 Streamlit Community Cloud
+3. 選擇這個 GitHub repository
+4. Main file path 填入：
+
+```text
+app.py
+```
+
+5. 部署完成後，分享 Streamlit 產生的網址即可
+
+專案已包含：
+
+- `requirements.txt`：部署時安裝必要套件
+- `runtime.txt`：指定部署使用的 Python 版本
+- `.streamlit/config.toml`：Streamlit 介面設定
+
+本機開發者仍然可以使用：
+
+```bash
+streamlit run app.py
+```
+
 ## Demo Screenshots
 
 目前可將截圖放在 `assets/` 資料夾，並在 README 中更新圖片路徑。
