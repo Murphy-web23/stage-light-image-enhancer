@@ -6,6 +6,12 @@ Stage Light Image Enhancer 是一個使用 Python、Streamlit 和 OpenCV 製作�
 
 這是一個初學者作品集專案，重點放在把影像處理流程拆成清楚的模組，並透過簡單的 Web UI 讓非工程使用者也能操作。
 
+## 線上 Demo
+
+可以直接開啟 Streamlit 版本試用：
+
+https://stage-light-image-enhancer-9nnjftf4rudasqxdmc8sbq.streamlit.app/
+
 ## 專案動機
 
 演唱會或舞台照片常會受到強烈燈光影響，例如紫光、紅光、黃光、低光源、高 ISO 雜訊與對比不足。這些照片雖然有現場感，但有時會讓人物膚色失真、細節變暗，或整張照片偏色嚴重。
@@ -131,19 +137,15 @@ streamlit run app.py
 
 ## Demo Screenshots
 
-目前可將截圖放在 `assets/` 資料夾，並在 README 中更新圖片路徑。
+### 紅光偏色自動修復案例
 
-```md
-![App screenshot](assets/demo_app.png)
-![Before and after result](assets/demo_before_after.png)
-```
+以下案例使用自動修復模式，沒有手動調整參數。App 自動偵測為紅光偏色，偏色程度約 85%，並套用預設修復流程。
 
-預計展示內容：
+![App detects red color cast](assets/red-cast-app-detection.png)
 
-- Streamlit 主畫面
-- Before / After 比較
-- 側邊欄修復參數
-- 不同色偏模式的修復結果
+| 修復前 | 自動修復後 |
+| --- | --- |
+| ![Red cast before enhancement](assets/red-cast-before.jpg) | ![Red cast after automatic enhancement](assets/red-cast-after.jpg) |
 
 ## 方法說明
 
