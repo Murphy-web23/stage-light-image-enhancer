@@ -147,6 +147,16 @@ streamlit run app.py
 | --- | --- |
 | ![Red cast before enhancement](assets/red-cast-before.jpg) | ![Red cast after automatic enhancement](assets/red-cast-after.jpg) |
 
+### 紫色燈偏自動修復案例
+
+以下案例同樣使用自動修復模式，沒有手動調整參數。App 自動偵測為紫色燈偏，偏色程度約 100%，並套用預設修復流程。
+
+![App detects purple color cast](assets/purple-cast-app-detection.png)
+
+| 修復前 | 自動修復後 |
+| --- | --- |
+| ![Purple cast before enhancement](assets/purple-cast-before.png) | ![Purple cast after automatic enhancement](assets/purple-cast-after.png) |
+
 ## 方法說明
 
 ### White Balance
