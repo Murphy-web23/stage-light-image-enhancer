@@ -66,10 +66,10 @@ def denoise_image(image: np.ndarray, strength: int = 7) -> np.ndarray:
 
 def recover_highlights(
     image: np.ndarray,
-    strength: int | float = 50,
-    threshold: int | float = 190,
+    strength: int | float = 35,
+    threshold: int | float = 195,
 ) -> np.ndarray:
-    """Compress harsh highlights while preserving the original color balance."""
+    """Compress harsh highlights without changing the scene color."""
     image_rgb = _to_uint8_rgb(image)
     strength_value = float(np.clip(strength, 0, 100)) / 100.0
 
@@ -87,47 +87,14 @@ def recover_highlights(
     )
     highlight_mask = cv2.GaussianBlur(highlight_mask, (0, 0), sigmaX=2.0)
 
-    compression = 0.82 * strength_value
+    compression = 0.72 * strength_value
     compressed_lightness = lightness - np.maximum(lightness - threshold_value, 0.0) * compression
 
-    blend_mask = np.clip(highlight_mask * (0.50 + strength_value * 0.65), 0.0, 1.0)
+    blend_mask = np.clip(highlight_mask * (0.45 + strength_value * 0.45), 0.0, 0.85)
     blended_lightness = lightness * (1.0 - blend_mask) + compressed_lightness * blend_mask
 
-    # Stage lights can push highlights toward cyan or green. Pull only the
-    # brightest chroma slightly toward neutral to avoid introducing a color cast.
-    chroma_mask = np.clip(highlight_mask * strength_value * 0.20, 0.0, 0.18)
-    neutral_a = a_channel * (1.0 - chroma_mask) + 128.0 * chroma_mask
-    neutral_b = b_channel * (1.0 - chroma_mask) + 128.0 * chroma_mask
-
-    recovered_lab = cv2.merge((blended_lightness, neutral_a, neutral_b))
-    recovered_rgb = cv2.cvtColor(_to_uint8_rgb(recovered_lab), cv2.COLOR_LAB2RGB)
-
-    original_float = image_rgb.astype(np.float32)
-    red, green, blue = cv2.split(original_float)
-    cyan_excess = np.maximum(np.minimum(green, blue) - red, 0.0)
-    green_excess = np.maximum(green - np.maximum(red, blue), 0.0)
-    cool_cast = np.clip((cyan_excess * 0.75 + green_excess * 0.55) / 85.0, 0.0, 1.0)
-    cool_highlight_mask = np.clip(
-        highlight_mask * cool_cast * (0.35 + strength_value * 0.75),
-        0.0,
-        0.75,
-    )[:, :, None]
-
-    if np.max(cool_highlight_mask) <= 0:
-        return recovered_rgb
-
-    recovered_float = recovered_rgb.astype(np.float32)
-    neutral_luminance = cv2.cvtColor(recovered_rgb, cv2.COLOR_RGB2GRAY).astype(np.float32)
-    warm_neutral = np.stack(
-        (
-            neutral_luminance * 1.03,
-            neutral_luminance * 1.00,
-            neutral_luminance * 0.97,
-        ),
-        axis=2,
-    )
-    neutralized = recovered_float * (1.0 - cool_highlight_mask) + warm_neutral * cool_highlight_mask
-    return _to_uint8_rgb(neutralized)
+    recovered_lab = cv2.merge((blended_lightness, a_channel, b_channel))
+    return cv2.cvtColor(_to_uint8_rgb(recovered_lab), cv2.COLOR_LAB2RGB)
 
 
 def restore_image_quality(image: np.ndarray, strength: int | float = 35) -> np.ndarray:

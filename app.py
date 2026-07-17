@@ -42,7 +42,7 @@ DEFAULT_SETTINGS = {
     "use_clahe": True,
     "use_denoise": False,
     "use_highlight_recovery": True,
-    "highlight_strength": 50,
+    "highlight_strength": 35,
     "use_quality_restore": True,
     "quality_strength": 35,
     "use_sharpen": True,

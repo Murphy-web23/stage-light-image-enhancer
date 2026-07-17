@@ -152,7 +152,7 @@ def _apply_mode_correction(image: np.ndarray, mode: str, correction_strength: in
         return correct_yellow_cast(image, strength=strength)
 
     if selected_mode == "cyan":
-        return correct_cyan_cast(image, strength=min(strength * 0.65, 0.65))
+        return correct_cyan_cast(image, strength=min(strength * 0.35, 0.35))
 
     if selected_mode == "red":
         return correct_red_cast(image, strength=strength)
@@ -175,7 +175,7 @@ def enhance_image(
     use_sharpen: bool = True,
     use_quality_restore: bool = True,
     use_highlight_recovery: bool = True,
-    highlight_strength: int | float = 50,
+    highlight_strength: int | float = 35,
     quality_strength: int | float = 35,
     correction_strength: int | float = 70,
     preserve_stage_light: int | float = 10,
@@ -183,19 +183,23 @@ def enhance_image(
     """Enhance a single RGB image with color, tone, and optional detail corrections."""
     original = ensure_rgb_array(image)
     result = original.copy()
+    normalized_mode = mode.lower().strip()
+    selected_mode_hint = _analyze_color_cast(original)[0] if normalized_mode == "auto" else normalized_mode
 
     result = _apply_mode_correction(result, mode, correction_strength)
     result = adjust_brightness_contrast(result, brightness=brightness, contrast=contrast)
     result = _adjust_saturation(result, saturation=saturation)
 
     if use_clahe:
-        result = apply_clahe(result, clip_limit=1.35)
+        clip_limit = 1.05 if selected_mode_hint == "cyan" else 1.35
+        result = apply_clahe(result, clip_limit=clip_limit)
 
     if use_denoise:
         result = denoise_image(result, strength=5)
 
     if use_highlight_recovery:
-        result = recover_highlights(result, strength=highlight_strength)
+        effective_highlight_strength = min(highlight_strength, 22) if selected_mode_hint == "cyan" else highlight_strength
+        result = recover_highlights(result, strength=effective_highlight_strength)
 
     if use_quality_restore:
         result = restore_image_quality(result, strength=quality_strength)
@@ -203,7 +207,7 @@ def enhance_image(
     if use_sharpen:
         result = sharpen_image(result, amount=0.22, sigma=1.1)
 
-    if mode.lower().strip() == "auto":
+    if normalized_mode == "auto":
         _, severity = _analyze_color_cast(original)
         preserve_stage_light = _auto_preserve_stage_light(preserve_stage_light, severity)
 
