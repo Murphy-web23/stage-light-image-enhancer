@@ -95,9 +95,9 @@ def correct_cyan_cast(image: np.ndarray, strength: float = 0.35) -> np.ndarray:
     weight = _midtone_weight(image_rgb)[:, :, 0]
 
     cyan_excess = np.maximum(((green + blue) / 2.0) - red, 0.0) * weight
-    corrected[:, :, 0] = red + cyan_excess * 0.55
-    corrected[:, :, 1] = green - cyan_excess * 0.28
-    corrected[:, :, 2] = blue - cyan_excess * 0.22
+    corrected[:, :, 0] = red + cyan_excess * 0.24
+    corrected[:, :, 1] = green - cyan_excess * 0.10
+    corrected[:, :, 2] = blue - cyan_excess * 0.08
 
     return _blend_with_original(image_rgb, corrected, strength)
 

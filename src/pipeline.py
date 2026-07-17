@@ -152,8 +152,7 @@ def _apply_mode_correction(image: np.ndarray, mode: str, correction_strength: in
         return correct_yellow_cast(image, strength=strength)
 
     if selected_mode == "cyan":
-        corrected = correct_cyan_cast(image, strength=strength)
-        return gray_world_white_balance(corrected, strength=min(strength * 0.20, 0.20))
+        return correct_cyan_cast(image, strength=min(strength * 0.65, 0.65))
 
     if selected_mode == "red":
         return correct_red_cast(image, strength=strength)
