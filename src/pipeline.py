@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 
 from src.color_correction import (
+    correct_cyan_cast,
     correct_purple_cast,
     correct_red_cast,
     correct_yellow_cast,
@@ -12,13 +13,14 @@ from src.enhancement import (
     adjust_brightness_contrast,
     apply_clahe,
     denoise_image,
+    recover_highlights,
     restore_image_quality,
     sharpen_image,
 )
 from src.utils import ensure_rgb_array
 
 
-SUPPORTED_MODES = {"auto", "purple", "yellow", "red", "low_light"}
+SUPPORTED_MODES = {"auto", "purple", "yellow", "red", "cyan", "low_light"}
 
 
 def _to_strength(value: int | float) -> float:
@@ -59,12 +61,17 @@ def _analyze_color_cast(image: Image.Image | np.ndarray) -> tuple[str, float]:
     purple_score = min(r_mean - g_mean, b_mean - g_mean) / mean_level
     red_score = (r_mean - max(g_mean, b_mean)) / mean_level
     yellow_score = (min(r_mean, g_mean) - b_mean) / mean_level
+    cyan_score = (min(g_mean, b_mean) - r_mean) / mean_level
 
     # Purple stage light often has both red and blue above green. Check it first
     # so magenta light is not misread as a simple red cast.
     if purple_score > 0.035:
         severity = np.clip(purple_score / 0.28, 0.25, 1.0)
         return "purple", float(severity)
+
+    if cyan_score > 0.035:
+        severity = np.clip(cyan_score / 0.28, 0.25, 1.0)
+        return "cyan", float(severity)
 
     if red_score > 0.045:
         severity = np.clip(red_score / 0.30, 0.25, 1.0)
@@ -144,6 +151,10 @@ def _apply_mode_correction(image: np.ndarray, mode: str, correction_strength: in
     if selected_mode == "yellow":
         return correct_yellow_cast(image, strength=strength)
 
+    if selected_mode == "cyan":
+        corrected = correct_cyan_cast(image, strength=strength)
+        return gray_world_white_balance(corrected, strength=min(strength * 0.20, 0.20))
+
     if selected_mode == "red":
         return correct_red_cast(image, strength=strength)
 
@@ -164,6 +175,8 @@ def enhance_image(
     use_denoise: bool = False,
     use_sharpen: bool = True,
     use_quality_restore: bool = True,
+    use_highlight_recovery: bool = True,
+    highlight_strength: int | float = 50,
     quality_strength: int | float = 35,
     correction_strength: int | float = 70,
     preserve_stage_light: int | float = 10,
@@ -181,6 +194,9 @@ def enhance_image(
 
     if use_denoise:
         result = denoise_image(result, strength=5)
+
+    if use_highlight_recovery:
+        result = recover_highlights(result, strength=highlight_strength)
 
     if use_quality_restore:
         result = restore_image_quality(result, strength=quality_strength)

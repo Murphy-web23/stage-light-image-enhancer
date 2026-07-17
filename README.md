@@ -27,9 +27,9 @@ https://stage-light-image-enhancer-9nnjftf4rudasqxdmc8sbq.streamlit.app/
 
 - 單張 JPG / PNG 圖片上傳
 - Before / After 雙欄比較
-- 支援多種修復模式：Auto、Purple cast、Yellow cast、Red cast、Low light
+- 支援多種修復模式：Auto、Purple cast、Yellow cast、Red cast、Cyan cast、Low light
 - 可調整亮度、對比與飽和度
-- 可選擇是否套用 CLAHE 局部對比增強、Denoise 降噪、Sharpen 銳化
+- 可選擇是否套用 CLAHE 局部對比增強、高光修復、Denoise 降噪、Sharpen 銳化
 - 顯示目前使用的修復參數
 - 下載修復後圖片
 - 基本錯誤處理，未上傳圖片時不會報錯
@@ -171,6 +171,12 @@ CLAHE 是 Contrast Limited Adaptive Histogram Equalization。它會針對局部�
 
 這對舞台照片很有幫助，因為人物可能在暗部，背景燈光卻很亮。CLAHE 可以讓暗部細節更明顯，同時用 clip limit 限制過度增強，減少雜訊被放大的問題。
 
+### Highlight Recovery
+
+高光修復會針對過亮區域建立柔和遮罩，將刺眼亮部做保守壓縮，減少白色衣服、麥克風或燈光被過度拉亮的感覺。
+
+這個功能屬於高光保護與亮部壓縮，能避免過曝區域在後續修復中變得更刺眼；但如果原始照片已經完全沒有細節，它無法真正還原已經遺失的紋理。
+
 ### Brightness / Contrast
 
 亮度與對比調整使用 NumPy 對 RGB array 做像素值轉換：
@@ -182,13 +188,14 @@ CLAHE 是 Contrast Limited Adaptive Histogram Equalization。它會針對局部�
 
 ### Color Cast Correction
 
-專案目前提供紫色、黃色與紅色色偏修正。這些功能會偵測特定通道過強的情況，並以較保守的比例降低偏色通道，同時補回相對不足的通道。
+專案目前提供紫色、黃色、紅色與藍綠色色偏修正。這些功能會偵測特定通道過強的情況，並以較保守的比例降低偏色通道，同時補回相對不足的通道。
 
 例如：
 
 - Purple cast：降低紅色與藍色相對於綠色的過度優勢
 - Yellow cast：降低紅色與綠色相對於藍色的過度優勢
 - Red cast：降低紅色通道過強的情況
+- Cyan cast：降低綠色與藍色相對於紅色的過度優勢
 
 這些方法不是深度學習模型，而是以 OpenCV 和 NumPy 實作的基礎規則式修正，優點是簡單、快速、容易理解，也適合作為影像處理入門作品。
 
@@ -199,7 +206,7 @@ CLAHE 是 Contrast Limited Adaptive Histogram Equalization。它會針對局部�
 - 只支援單張圖片
 - 色偏修正是規則式方法，遇到複雜燈光時可能不夠準確
 - 沒有做人臉或膚色保護
-- 沒有針對過曝區域做 highlight recovery
+- 高光修復屬於亮部壓縮與保護，無法還原已完全過曝而遺失的細節
 - 降噪與銳化參數目前是固定值
 - 尚未加入測試與效能評估
 
@@ -208,7 +215,7 @@ CLAHE 是 Contrast Limited Adaptive Histogram Equalization。它會針對局部�
 - 加入批次處理
 - 加入參數 preset 與自訂儲存
 - 加入膚色偵測，避免修正後人物膚色不自然
-- 加入曝光保護與高光壓制
+- 加入更進階的曝光保護與高光細節復原
 - 加入前後差異圖或直方圖分析
 - 加入單元測試與範例圖片
 - 支援影片逐幀處理或短影片色彩修正

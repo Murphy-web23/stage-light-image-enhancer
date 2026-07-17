@@ -87,6 +87,21 @@ def correct_yellow_cast(image: np.ndarray, strength: float = 0.35) -> np.ndarray
     return _blend_with_original(image_rgb, corrected, strength)
 
 
+def correct_cyan_cast(image: np.ndarray, strength: float = 0.35) -> np.ndarray:
+    """Reduce cyan or blue-green stage-light cast in an RGB image."""
+    image_rgb = _to_uint8_rgb(image)
+    corrected = image_rgb.astype(np.float32)
+    red, green, blue = cv2.split(corrected)
+    weight = _midtone_weight(image_rgb)[:, :, 0]
+
+    cyan_excess = np.maximum(((green + blue) / 2.0) - red, 0.0) * weight
+    corrected[:, :, 0] = red + cyan_excess * 0.55
+    corrected[:, :, 1] = green - cyan_excess * 0.28
+    corrected[:, :, 2] = blue - cyan_excess * 0.22
+
+    return _blend_with_original(image_rgb, corrected, strength)
+
+
 def correct_red_cast(image: np.ndarray, strength: float = 0.35) -> np.ndarray:
     """Reduce red cast in an RGB image while protecting highlights."""
     image_rgb = _to_uint8_rgb(image)

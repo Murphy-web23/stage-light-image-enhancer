@@ -19,6 +19,7 @@ MODE_OPTIONS = {
     "purple": "紫色燈偏",
     "yellow": "黃光偏色",
     "red": "紅光偏色",
+    "cyan": "藍綠光偏色",
     "low_light": "低光源照片",
 }
 
@@ -27,6 +28,7 @@ DETECTED_MODE_LABELS = {
     "purple": "紫色燈偏",
     "yellow": "黃光偏色",
     "red": "紅光偏色",
+    "cyan": "藍綠光偏色",
     "low_light": "低光源照片",
 }
 
@@ -39,6 +41,8 @@ DEFAULT_SETTINGS = {
     "saturation": 0,
     "use_clahe": True,
     "use_denoise": False,
+    "use_highlight_recovery": True,
+    "highlight_strength": 50,
     "use_quality_restore": True,
     "quality_strength": 35,
     "use_sharpen": True,
@@ -71,6 +75,8 @@ def show_current_parameters(
         "飽和度",
         "CLAHE 局部對比增強",
         "降噪",
+        "高光修復",
+        "高光修復強度",
         "畫質修復",
         "畫質修復強度",
         "銳化",
@@ -84,6 +90,8 @@ def show_current_parameters(
         st.session_state.saturation,
         "開啟" if st.session_state.use_clahe else "關閉",
         "開啟" if st.session_state.use_denoise else "關閉",
+        "開啟" if st.session_state.use_highlight_recovery else "關閉",
+        f"{st.session_state.highlight_strength}%",
         "開啟" if st.session_state.use_quality_restore else "關閉",
         f"{st.session_state.quality_strength}%",
         "開啟" if st.session_state.use_sharpen else "關閉",
@@ -126,6 +134,8 @@ def main() -> None:
         st.slider("飽和度", min_value=-100, max_value=100, step=1, key="saturation")
         st.checkbox("CLAHE 局部對比增強", key="use_clahe")
         st.checkbox("降噪", key="use_denoise")
+        st.checkbox("高光修復", key="use_highlight_recovery")
+        st.slider("高光修復強度", min_value=0, max_value=100, step=1, key="highlight_strength")
         st.checkbox("畫質修復", key="use_quality_restore")
         st.slider("畫質修復強度", min_value=0, max_value=100, step=1, key="quality_strength")
         st.checkbox("銳化", key="use_sharpen")
@@ -165,6 +175,8 @@ def main() -> None:
                 saturation=st.session_state.saturation,
                 use_clahe=st.session_state.use_clahe,
                 use_denoise=st.session_state.use_denoise,
+                use_highlight_recovery=st.session_state.use_highlight_recovery,
+                highlight_strength=st.session_state.highlight_strength,
                 use_quality_restore=st.session_state.use_quality_restore,
                 quality_strength=st.session_state.quality_strength,
                 use_sharpen=st.session_state.use_sharpen,
