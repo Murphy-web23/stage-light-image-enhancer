@@ -7,8 +7,12 @@ from src.pipeline import detect_color_cast, detect_color_cast_strength, enhance_
 from src.utils import pil_to_png_bytes
 
 
+APP_TITLE = "演唱會影像修復工具"
+APP_SUBTITLE = "舞台燈 / 演唱會照片修復工具"
+
+
 st.set_page_config(
-    page_title="演唱會影像修復工具",
+    page_title=APP_TITLE,
     page_icon="🎤",
     layout="wide",
 )
@@ -49,6 +53,107 @@ DEFAULT_SETTINGS = {
 }
 
 
+def inject_styles() -> None:
+    """Apply compact app-level styles for a cleaner Streamlit interface."""
+    st.markdown(
+        """
+        <style>
+            .block-container {
+                max-width: 1280px;
+                padding-top: 2.25rem;
+                padding-bottom: 3rem;
+            }
+
+            [data-testid="stSidebar"] {
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+                gap: 0.8rem;
+            }
+
+            .app-title {
+                margin: 0;
+                font-size: clamp(2.2rem, 4vw, 4.2rem);
+                font-weight: 800;
+                line-height: 1.05;
+                letter-spacing: 0;
+            }
+
+            .app-subtitle {
+                color: rgba(255, 255, 255, 0.62);
+                font-size: 1.05rem;
+                margin-top: 0.65rem;
+                margin-bottom: 0.35rem;
+            }
+
+            .workflow-hint {
+                color: rgba(255, 255, 255, 0.48);
+                font-size: 0.92rem;
+                margin: 0 0 1.55rem;
+            }
+
+            .section-label {
+                color: rgba(255, 255, 255, 0.56);
+                font-size: 0.82rem;
+                font-weight: 700;
+                letter-spacing: 0.04rem;
+                margin-top: 0.35rem;
+                text-transform: uppercase;
+            }
+
+            .status-panel {
+                border: 1px solid rgba(80, 132, 255, 0.32);
+                border-radius: 10px;
+                background: rgba(34, 58, 112, 0.36);
+                padding: 1rem 1.1rem;
+                margin: 1rem 0 1.5rem;
+            }
+
+            .status-panel strong {
+                color: #8fb3ff;
+            }
+
+            .status-panel div + div {
+                color: rgba(255, 255, 255, 0.82);
+                margin-top: 0.22rem;
+            }
+
+            .empty-panel {
+                border: 1px dashed rgba(255, 255, 255, 0.22);
+                border-radius: 10px;
+                padding: 1.35rem 1.4rem;
+                background: rgba(255, 255, 255, 0.035);
+                color: rgba(255, 255, 255, 0.72);
+            }
+
+            .stDownloadButton button,
+            .stButton button {
+                border-radius: 8px;
+                min-height: 2.65rem;
+                font-weight: 700;
+            }
+
+            [data-testid="stFileUploader"] section {
+                border-radius: 10px;
+                border-color: rgba(255, 255, 255, 0.16);
+                background: rgba(255, 255, 255, 0.045);
+            }
+
+            [data-testid="stImage"] img {
+                border-radius: 8px;
+            }
+
+            div[data-testid="stExpander"] {
+                border-radius: 8px;
+                border-color: rgba(255, 255, 255, 0.12);
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def initialize_settings() -> None:
     """Initialize Streamlit widget state with recommended defaults."""
     for key, value in DEFAULT_SETTINGS.items():
@@ -59,6 +164,30 @@ def reset_settings() -> None:
     """Reset all enhancement controls to recommended defaults."""
     for key, value in DEFAULT_SETTINGS.items():
         st.session_state[key] = value
+
+
+def show_app_header() -> None:
+    """Render the app heading."""
+    st.markdown(f"<h1 class='app-title'>{APP_TITLE}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p class='app-subtitle'>{APP_SUBTITLE}</p>", unsafe_allow_html=True)
+    st.markdown(
+        "<p class='workflow-hint'>上傳圖片後會先套用建議設定；需要時再從左側微調。</p>",
+        unsafe_allow_html=True,
+    )
+
+
+def show_detection_status(detected_mode: str, detected_strength: int) -> None:
+    """Render the auto-detection result."""
+    label = DETECTED_MODE_LABELS.get(detected_mode, "整體白平衡")
+    st.markdown(
+        f"""
+        <div class="status-panel">
+            <div><strong>自動修復判斷</strong></div>
+            <div>{label}，偏色程度約 {detected_strength}%</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def show_current_parameters(
@@ -106,49 +235,88 @@ def show_current_parameters(
         labels.insert(insert_index, "偵測偏色程度")
         values.insert(insert_index, f"{detected_strength}%")
 
-    st.subheader("目前使用的參數")
-    st.table({"項目": labels, "設定值": values})
+    with st.expander("查看本次修復設定", expanded=False):
+        st.table({"項目": labels, "設定值": values})
 
 
-def main() -> None:
-    initialize_settings()
-
-    st.title("演唱會影像修復工具")
-    st.caption("舞台燈 / 演唱會照片修復工具")
-
+def show_sidebar_controls() -> None:
+    """Render grouped sidebar controls."""
     with st.sidebar:
         st.header("修復設定")
         st.button("一鍵回到預設值", on_click=reset_settings, use_container_width=True)
-        st.caption("預設值是建議起點。上傳後，自動修復會依圖片判斷偏色類型與偏色程度，再動態加強修復。")
+        st.caption("建議先使用自動修復，再依照片效果微調。")
 
+        st.markdown("<div class='section-label'>主要設定</div>", unsafe_allow_html=True)
         st.selectbox(
             "修復模式",
             options=list(MODE_OPTIONS.keys()),
             format_func=lambda key: MODE_OPTIONS[key],
             key="mode",
+            help="自動修復會先分析偏色；只有在你想指定處理方向時才需要手動選擇。",
         )
-        st.slider("修復強度", min_value=0, max_value=100, step=1, key="correction_strength")
-        st.slider("保留舞台氛圍", min_value=0, max_value=100, step=1, key="preserve_stage_light")
-        st.slider("亮度", min_value=-100, max_value=100, step=1, key="brightness")
-        st.slider("對比", min_value=-100, max_value=100, step=1, key="contrast")
-        st.slider("飽和度", min_value=-100, max_value=100, step=1, key="saturation")
-        st.checkbox("CLAHE 局部對比增強", key="use_clahe")
-        st.checkbox("降噪", key="use_denoise")
-        st.checkbox("高光修復", key="use_highlight_recovery")
-        st.slider("高光修復強度", min_value=0, max_value=100, step=1, key="highlight_strength")
-        st.checkbox("畫質修復", key="use_quality_restore")
-        st.slider("畫質修復強度", min_value=0, max_value=100, step=1, key="quality_strength")
-        st.checkbox("銳化", key="use_sharpen")
+        st.slider(
+            "修復強度",
+            min_value=0,
+            max_value=100,
+            step=1,
+            key="correction_strength",
+            help="提高時會更積極修正偏色；覺得失去現場感時可稍微降低。",
+        )
+        st.slider(
+            "保留舞台氛圍",
+            min_value=0,
+            max_value=100,
+            step=1,
+            key="preserve_stage_light",
+            help="提高時會保留更多原本的燈光顏色與舞台氣氛。",
+        )
+
+        with st.expander("色調微調", expanded=False):
+            st.caption("修復後仍覺得太亮、太暗或顏色不對時再使用。")
+            st.slider("亮度", min_value=-100, max_value=100, step=1, key="brightness")
+            st.slider("對比", min_value=-100, max_value=100, step=1, key="contrast")
+            st.slider("飽和度", min_value=-100, max_value=100, step=1, key="saturation")
+
+        with st.expander("進階修復", expanded=False):
+            st.caption("適合處理局部反差、過亮區域、畫面雜訊或細節。")
+            st.checkbox("CLAHE 局部對比增強", key="use_clahe")
+            st.checkbox("高光修復", key="use_highlight_recovery")
+            st.slider("高光修復強度", min_value=0, max_value=100, step=1, key="highlight_strength")
+            st.checkbox("畫質修復", key="use_quality_restore")
+            st.slider("畫質修復強度", min_value=0, max_value=100, step=1, key="quality_strength")
+            st.checkbox("降噪", key="use_denoise")
+            st.checkbox("銳化", key="use_sharpen")
+
+
+def show_empty_state() -> None:
+    """Render the initial state before an image is uploaded."""
+    st.markdown(
+        """
+        <div class="empty-panel">
+            請先上傳一張 JPG 或 PNG 圖片。
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    show_current_parameters()
+
+
+def main() -> None:
+    inject_styles()
+    initialize_settings()
+
+    show_sidebar_controls()
+    show_app_header()
 
     uploaded_file = st.file_uploader(
         "上傳一張 JPG 或 PNG 圖片",
         type=["jpg", "jpeg", "png"],
         accept_multiple_files=False,
+        help="圖片會只在這次瀏覽器工作階段內處理，不會自動儲存到專案。",
     )
 
     if uploaded_file is None:
-        st.info("請先上傳一張 JPG 或 PNG 圖片開始修復。")
-        show_current_parameters()
+        show_empty_state()
         return
 
     try:
@@ -160,10 +328,7 @@ def main() -> None:
     detected_mode = detect_color_cast(image) if st.session_state.mode == "auto" else None
     detected_strength = detect_color_cast_strength(image) if st.session_state.mode == "auto" else None
     if detected_mode is not None:
-        st.info(
-            f"自動修復判斷：{DETECTED_MODE_LABELS.get(detected_mode, '整體白平衡')}，"
-            f"偏色程度約 {detected_strength}%"
-        )
+        show_detection_status(detected_mode, detected_strength)
 
     try:
         with st.spinner("正在修復圖片..."):
@@ -188,21 +353,26 @@ def main() -> None:
         st.error(f"圖片修復失敗：{error}")
         return
 
-    before_col, after_col = st.columns(2)
+    st.divider()
+    before_col, after_col = st.columns(2, gap="large")
 
     with before_col:
         st.subheader("修復前")
+        st.caption("原始上傳圖片")
         st.image(image, use_container_width=True)
 
     with after_col:
         st.subheader("修復後")
+        st.caption("目前設定產生的結果")
         st.image(enhanced_array, use_container_width=True)
-        st.download_button(
-            label="下載修復後圖片",
-            data=pil_to_png_bytes(enhanced_image),
-            file_name="enhanced_stage_light_image.png",
-            mime="image/png",
-        )
+
+    st.download_button(
+        label="下載修復後圖片",
+        data=pil_to_png_bytes(enhanced_image),
+        file_name="enhanced_stage_light_image.png",
+        mime="image/png",
+        use_container_width=True,
+    )
 
     show_current_parameters(detected_mode=detected_mode, detected_strength=detected_strength)
 
