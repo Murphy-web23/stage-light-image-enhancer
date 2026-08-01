@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>演唱會影像修復</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='11' fill='none' stroke='%237E8F86' stroke-width='2.5'/><path d='M16 5v22M6.5 10.5l19 11M6.5 21.5l19-11' stroke='%237E8F86' stroke-width='2'/></svg>" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wordmark">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="11.2" />
+      <path d="M16 4.8v22.4M6.3 10.4l19.4 11.2M6.3 21.6l19.4-11.2" />
+    </svg>
+    <div>
+      <h1>演唱會影像修復</h1>
+      <p>把舞台燈吃掉的膚色與細節找回來</p>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ── Empty state ───────────────────────────────────────────── -->
+  <section class="dropzone" id="dropzone">
+    <input type="file" id="file-input" accept="image/jpeg,image/png" hidden />
+    <div class="dropzone-body">
+      <svg class="dropzone-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 15.5V4m0 0L8 8m4-4 4 4" />
+        <path d="M3.5 15v3a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-3" />
+      </svg>
+      <h2>把演唱會照片拖進來</h2>
+      <p>或 <button type="button" class="link-btn" id="browse-btn">從電腦選擇</button></p>
+      <p class="dropzone-note">JPG 或 PNG，20 MB 以內。照片只在這次操作中處理，不會留存。</p>
+    </div>
+  </section>
+
+  <!-- ── Editor ────────────────────────────────────────────────── -->
+  <section class="editor" id="editor" hidden>
+
+    <div class="stage-area">
+      <div class="stage-head">
+        <span class="chip" id="detection-chip">分析中</span>
+        <span class="file-meta" id="file-meta"></span>
+      </div>
+
+      <div class="compare" id="compare">
+        <img class="compare-img compare-before" id="img-before" alt="修復前" draggable="false" />
+        <img class="compare-img compare-after" id="img-after" alt="修復後" draggable="false" />
+        <div class="compare-handle" id="compare-handle">
+          <span class="compare-grip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 7 5.5 12 10 17M14 7l4.5 5-4.5 5" /></svg>
+          </span>
+        </div>
+        <span class="compare-tag compare-tag-left">修復前</span>
+        <span class="compare-tag compare-tag-right">修復後</span>
+        <div class="compare-busy" id="compare-busy"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <aside class="rail">
+      <div class="panel">
+        <h2 class="panel-title">修復</h2>
+
+        <div class="field">
+          <label class="field-label" for="mode-btn">修復模式</label>
+          <div class="select" id="mode-select">
+            <button type="button" class="select-btn" id="mode-btn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="mode-label">自動修復</span>
+              <svg class="select-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+            </button>
+            <ul class="select-menu" id="mode-menu" role="listbox" aria-labelledby="mode-btn" hidden>
+              <li class="select-option" role="option" data-value="auto">自動修復</li>
+              <li class="select-option" role="option" data-value="purple">紫色燈偏</li>
+              <li class="select-option" role="option" data-value="yellow">黃光偏色</li>
+              <li class="select-option" role="option" data-value="red">紅光偏色</li>
+              <li class="select-option" role="option" data-value="cyan">藍綠光偏色</li>
+              <li class="select-option" role="option" data-value="low_light">低光源照片</li>
+            </ul>
+            <select id="mode" class="sr-only" tabindex="-1" aria-hidden="true">
+              <option value="auto">自動修復</option>
+              <option value="purple">紫色燈偏</option>
+              <option value="yellow">黃光偏色</option>
+              <option value="red">紅光偏色</option>
+              <option value="cyan">藍綠光偏色</option>
+              <option value="low_light">低光源照片</option>
+            </select>
+          </div>
+          <p class="field-hint">自動修復會先分析偏色，通常不用手動選。</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="correction_strength">修復強度 <output id="correction_strength-out">70%</output></label>
+          <input type="range" id="correction_strength" min="0" max="100" step="1" />
+          <p class="field-hint">越高越積極修正偏色。</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="preserve_stage_light">保留舞台氛圍 <output id="preserve_stage_light-out">10%</output></label>
+          <input type="range" id="preserve_stage_light" min="0" max="100" step="1" />
+          <p class="field-hint">越高保留越多原本的燈光顏色。</p>
+        </div>
+      </div>
+
+      <div class="panel actions">
+        <button type="button" class="btn btn-primary" id="download-btn">
+          <span id="download-label">下載修復後照片</span>
+        </button>
+        <div class="actions-row">
+          <button type="button" class="btn btn-quiet" id="reset-btn">回到預設值</button>
+          <button type="button" class="btn btn-quiet" id="change-btn">換一張</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Adjustment bench: the fine-tuning controls, laid out like a lighting desk. -->
+    <section class="bench">
+      <div class="bench-group">
+        <h3 class="bench-title">色調微調</h3>
+        <div class="bench-row">
+          <div class="field">
+            <label class="field-label" for="brightness">亮度 <output id="brightness-out">0</output></label>
+            <input type="range" id="brightness" min="-100" max="100" step="1" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="contrast">對比 <output id="contrast-out">0</output></label>
+            <input type="range" id="contrast" min="-100" max="100" step="1" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="saturation">飽和度 <output id="saturation-out">0</output></label>
+            <input type="range" id="saturation" min="-100" max="100" step="1" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bench-group">
+        <h3 class="bench-title">進階修復</h3>
+        <div class="bench-row">
+          <div class="field">
+            <label class="switch">
+              <input type="checkbox" id="use_highlight_recovery" />
+              <span class="switch-track"></span>
+              <span class="switch-text">高光修復</span>
+            </label>
+            <div class="sub-slider">
+              <label class="field-label field-label-sm" for="highlight_strength">強度 <output id="highlight_strength-out">35%</output></label>
+              <input type="range" id="highlight_strength" min="0" max="100" step="1" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="switch">
+              <input type="checkbox" id="use_quality_restore" />
+              <span class="switch-track"></span>
+              <span class="switch-text">畫質修復</span>
+            </label>
+            <div class="sub-slider">
+              <label class="field-label field-label-sm" for="quality_strength">強度 <output id="quality_strength-out">35%</output></label>
+              <input type="range" id="quality_strength" min="0" max="100" step="1" />
+            </div>
+          </div>
+
+          <div class="field switch-stack">
+            <label class="switch">
+              <input type="checkbox" id="use_clahe" />
+              <span class="switch-track"></span>
+              <span class="switch-text">局部對比增強</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="use_denoise" />
+              <span class="switch-track"></span>
+              <span class="switch-text">降噪</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="use_sharpen" />
+              <span class="switch-track"></span>
+              <span class="switch-text">銳化</span>
+            </label>
+            <div>
+              <label class="switch">
+                <input type="checkbox" id="upscale_2x" />
+                <span class="switch-track"></span>
+                <span class="switch-text">輸出放大 2×</span>
+              </label>
+              <p class="field-hint field-hint-indent" id="upscale-hint">只影響下載的檔案，預覽不變。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
