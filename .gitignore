@@ -12,5 +12,10 @@ outputs/*
 sample_images/*
 !sample_images/.gitkeep
 
+report_notes/
+
+# Local dev-server config; contains machine-specific interpreter paths.
+.claude/
+
 .DS_Store
 Thumbs.db
