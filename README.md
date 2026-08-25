@@ -213,6 +213,16 @@ https://stage-light-image-enhancer-9nnjftf4rudasqxdmc8sbq.streamlit.app/
 
 修復後人物膚色的紫/洋紅偏色降低，暗部細節（黑色服裝邊緣）略為清晰，但仍保留了紫色舞台燈的現場氣氛，沒有被修成平淡的白光。
 
+### 操作介面
+
+新版前端（React + Tailwind）的編輯畫面，中間是滑桿分割對比，右側是色偏修復、光影色調、細節畫質、輸出規格四個分頁：
+
+![StageLens editor with slider comparison and control panel](assets/ui-editor-full.png)
+
+也可以切換成左右並排檢視：
+
+![Side-by-side before/after comparison view](assets/ui-compare-panel.png)
+
 ## 方法說明
 
 ### White Balance
