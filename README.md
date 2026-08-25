@@ -203,25 +203,15 @@ https://stage-light-image-enhancer-9nnjftf4rudasqxdmc8sbq.streamlit.app/
 
 ## Demo Screenshots
 
-### 紅光偏色自動修復案例
+### 紫色舞台燈偏色手動修復案例
 
-以下案例使用自動修復模式，沒有手動調整參數。App 自動偵測為紅光偏色，偏色程度約 85%，並套用預設修復流程。
+演唱會多人舞台照片，紫藍色舞台燈造成明顯偏色。這次使用手動選擇「紫色修復」模式，修復強度 74%、保留現場光影 10%，而不是自動模式，示範使用者自行微調參數的效果。
 
-![App detects red color cast](assets/red-cast-app-detection.png)
-
-| 修復前 | 自動修復後 |
+| 修復前 | 修復後 |
 | --- | --- |
-| ![Red cast before enhancement](assets/red-cast-before.jpg) | ![Red cast after automatic enhancement](assets/red-cast-after.jpg) |
+| ![Purple stage light before enhancement](assets/purple-manual-before.jpg) | ![Purple stage light after manual purple-mode enhancement](assets/purple-manual-after.png) |
 
-### 紫色燈偏自動修復案例
-
-以下案例同樣使用自動修復模式，沒有手動調整參數。App 自動偵測為紫色燈偏，偏色程度約 100%，並套用預設修復流程。
-
-![App detects purple color cast](assets/purple-cast-app-detection.png)
-
-| 修復前 | 自動修復後 |
-| --- | --- |
-| ![Purple cast before enhancement](assets/purple-cast-before.png) | ![Purple cast after automatic enhancement](assets/purple-cast-after.png) |
+修復後人物膚色的紫/洋紅偏色降低，暗部細節（黑色服裝邊緣）略為清晰，但仍保留了紫色舞台燈的現場氣氛，沒有被修成平淡的白光。
 
 ## 方法說明
 
