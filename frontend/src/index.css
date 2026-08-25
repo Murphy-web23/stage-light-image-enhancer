@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Nunito', -apple-system, BlinkMacSystemFont, 'Hiragino Maru Gothic ProN', 'Yuanti TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: #F7F9FC;
+    color: #2D3B48;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@keyframes scan {
+  0% {
+    top: 0%;
+    opacity: 0.7;
+  }
+  50% {
+    top: 96%;
+    opacity: 0.9;
+  }
+  100% {
+    top: 0%;
+    opacity: 0.7;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(2deg);
+  }
+}
+
+@keyframes sway {
+  0%, 100% {
+    transform: rotate(-3.5deg);
+  }
+  50% {
+    transform: rotate(3.5deg);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-scan {
+  animation: scan 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3.8s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 2.8s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 4.8s ease-in-out infinite;
+}
+
+.animate-sway {
+  animation: sway 3.2s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 2.2s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.5s ease-in-out infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 2s ease-in-out infinite;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom range slider styling in gentle soft sky blue */
+input[type="range"] {
+  accent-color: #7BA8CE;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  background-color: #6B9CC4;
+}
+
+

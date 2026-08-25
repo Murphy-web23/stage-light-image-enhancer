@@ -19,3 +19,7 @@ report_notes/
 
 .DS_Store
 Thumbs.db
+
+# Frontend (frontend/) build tooling; vite builds straight into web/.
+frontend/node_modules/
+frontend/.vite/
